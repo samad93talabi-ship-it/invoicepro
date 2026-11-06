@@ -162,8 +162,33 @@ function removeRow(button){
  button.closest("tr").remove();
  calculate();
 }
+function formatMoney(amount) {
+ const currency = document.getElementById("currency").value;
+ return new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: currency
+ }).format(amount);
+}
 
 function calculate(){
+ let subtotal=0;
+
+ document.querySelectorAll("#items tr").forEach(row=>{
+  const qty=Math.max(0,Number(row.querySelector(".qty").value)||0);
+  const price=Math.max(0,Number(row.querySelector(".price").value)||0);
+  const total=qty*price;
+
+  row.querySelector(".lineTotal").textContent=formatMoney(total);
+  subtotal+=total;
+ });
+
+ const taxRate=Math.max(0,Number(document.getElementById("tax").value)||0);
+ const taxAmount=subtotal*taxRate/100;
+
+ document.getElementById("subtotal").textContent=formatMoney(subtotal);
+ document.getElementById("taxAmount").textContent=formatMoney(taxAmount);
+ document.getElementById("grandTotal").textContent=formatMoney(subtotal+taxAmount);
+}
  let subtotal=0;
  document.querySelectorAll("#items tr").forEach(row=>{
   const qty=Math.max(0,Number(row.querySelector(".qty").value)||0);
@@ -198,7 +223,7 @@ function resetForm(){
 }
 
 document.addEventListener("input",calculate);
-document.getElementById("date").value=new Date().toISOString().slice(0,10);
+document.getElementById("currency").addEventListener("change",calculate);
 calculate();
 </script>
 </body>
