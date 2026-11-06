@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InvoicePro - Free Invoice Generator</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6fb;color:#172b4d}
+header{background:#173b70;color:white;padding:22px 7%;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:25px;font-weight:bold}
+.tag{font-size:12px;background:#ffffff25;padding:8px 12px;border-radius:20px}
+main{max-width:950px;margin:35px auto;padding:0 16px}
+.intro{text-align:center;margin-bottom:28px}
+.intro h1{font-size:32px;margin-bottom:8px}
+.intro p{color:#64748b}
+.panel{background:white;padding:25px;border-radius:15px;box-shadow:0 5px 25px #173b7010;margin-bottom:20px}
+h2{font-size:19px;margin-top:0;color:#173b70}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+label{display:block;font-size:13px;font-weight:bold;margin-bottom:7px}
+input{width:100%;padding:12px;border:1px solid #dce3ed;border-radius:7px;font-size:14px;margin-bottom:15px}
+input:focus{outline:2px solid #9bbcf5}
+table{width:100%;border-collapse:collapse;margin:15px 0}
+th,td{text-align:left;padding:9px;border-bottom:1px solid #e7ebf1}
+th{font-size:12px;color:#64748b}
+td input{margin:0;min-width:60px}
+button{border:0;padding:12px 17px;border-radius:8px;cursor:pointer;font-weight:bold}
+.add{background:#eaf1ff;color:#2458a6}
+.remove{background:#fff0f0;color:#bd3434;padding:8px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.primary{background:#2458a6;color:white}
+.secondary{background:#eaf1ff;color:#2458a6}
+.total{text-align:right;font-size:17px;line-height:2}
+.total strong{font-size:25px;color:#173b70}
+footer{text-align:center;color:#8290a5;padding:25px;font-size:12px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.panel{padding:16px}header{padding:18px}.intro h1{font-size:25px}table{font-size:12px}}
+@media print{
+body{background:white}
+header,.intro,.no-print,footer{display:none!important}
+main{margin:0;padding:0;max-width:none}
+.panel{box-shadow:none;padding:12px;break-inside:avoid}
+input{border:0;padding:4px;margin:0}
+.remove{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+ <div class="logo">InvoicePro.</div>
+ <div class="tag">FREE INVOICE GENERATOR</div>
+</header>
+
+<main>
+ <section class="intro">
+  <h1>Create Your Invoice in Seconds</h1>
+  <p>Simple, professional invoicing for freelancers and small businesses.</p>
+ </section>
+
+ <section class="panel">
+  <h2>Invoice Details</h2>
+  <div class="grid">
+   <div>
+    <label>Your Business Name</label>
+    <input id="business" placeholder="Your Company">
+   </div>
+   <div>
+    <label>Client Name</label>
+    <input id="client" placeholder="Client Name">
+   </div>
+   <div>
+    <label>Invoice Number</label>
+    <input id="number" value="INV-001">
+   </div>
+   <div>
+    <label>Invoice Date</label>
+    <input id="date" type="date">
+   </div>
+  </div>
+ </section>
+
+ <section class="panel">
+  <h2>Invoice Items</h2>
+  <table>
+   <thead>
+    <tr>
+     <th>Description</th>
+     <th>Quantity</th>
+     <th>Price ($)</th>
+     <th>Total</th>
+     <th class="no-print"></th>
+    </tr>
+   </thead>
+   <tbody id="items">
+    <tr>
+     <td><input class="desc" placeholder="Service description"></td>
+     <td><input class="qty" type="number" min="0" value="1"></td>
+     <td><input class="price" type="number" min="0" step="0.01" placeholder="0.00"></td>
+     <td class="lineTotal">$0.00</td>
+     <td class="no-print"><button class="remove" onclick="removeRow(this)">×</button></td>
+    </tr>
+   </tbody>
+  </table>
+  <button class="add no-print" onclick="addRow()">+ Add Item</button>
+
+  <div class="total">
+   <div>Subtotal: <span id="subtotal">$0.00</span></div>
+   <div>Tax (%): <input id="tax" type="number" min="0" value="0" style="width:75px;display:inline-block;margin:0"></div>
+   <div>Tax Amount: <span id="taxAmount">$0.00</span></div>
+   <div><strong>Total: <span id="grandTotal">$0.00</span></strong></div>
+  </div>
+ </section>
+
+ <section class="panel">
+  <h2>Payment Information</h2>
+  <label>Payment Instructions</label>
+  <input id="payment" placeholder="Bank transfer, PayPal, etc.">
+  <label>Notes</label>
+  <input id="notes" placeholder="Thank you for your business!">
+  <div class="actions no-print">
+   <button class="primary" onclick="window.print()">Download / Save PDF</button>
+   <button class="secondary" onclick="resetForm()">New Invoice</button>
+  </div>
+ </section>
+</main>
+
+<footer>InvoicePro. | Simple invoicing made easy.</footer>
+
+<script>
+const items = document.getElementById("items");
+
+function addRow(){
+ const row=document.createElement("tr");
+ row.innerHTML=`
+ <td><input class="desc" placeholder="Service description"></td>
+ <td><input class="qty" type="number" min="0" value="1"></td>
+ <td><input class="price" type="number" min="0" step="0.01" placeholder="0.00"></td>
+ <td class="lineTotal">$0.00</td>
+ <td class="no-print"><button class="remove" onclick="removeRow(this)">×</button></td>`;
+ items.appendChild(row);
+ calculate();
+}
+
+function removeRow(button){
+ button.closest("tr").remove();
+ calculate();
+}
+
+function calculate(){
+ let subtotal=0;
+ document.querySelectorAll("#items tr").forEach(row=>{
+  const qty=Math.max(0,Number(row.querySelector(".qty").value)||0);
+  const price=Math.max(0,Number(row.querySelector(".price").value)||0);
+  const total=qty*price;
+  row.querySelector(".lineTotal").textContent="$"+total.toFixed(2);
+  subtotal+=total;
+ });
+ const taxRate=Math.max(0,Number(document.getElementById("tax").value)||0);
+ const taxAmount=subtotal*taxRate/100;
+ document.getElementById("subtotal").textContent="$"+subtotal.toFixed(2);
+ document.getElementById("taxAmount").textContent="$"+taxAmount.toFixed(2);
+ document.getElementById("grandTotal").textContent="$"+(subtotal+taxAmount).toFixed(2);
+}
+
+function resetForm(){
+ if(confirm("Start a new invoice?")){
+  document.querySelectorAll("input").forEach(input=>input.value="");
+  document.getElementById("number").value="INV-001";
+  document.getElementById("tax").value="0";
+  document.getElementById("date").value=new Date().toISOString().slice(0,10);
+  items.innerHTML=`
+  <tr>
+   <td><input class="desc" placeholder="Service description"></td>
+   <td><input class="qty" type="number" min="0" value="1"></td>
+   <td><input class="price" type="number" min="0" step="0.01" placeholder="0.00"></td>
+   <td class="lineTotal">$0.00</td>
+   <td class="no-print"><button class="remove" onclick="removeRow(this)">×</button></td>
+  </tr>`;
+  calculate();
+ }
+}
+
+document.addEventListener("input",calculate);
+document.getElementById("date").value=new Date().toISOString().slice(0,10);
+calculate();
+</script>
+</body>
+</html>
